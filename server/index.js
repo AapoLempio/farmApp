@@ -17,18 +17,13 @@ AWS.config.update({
 
 const docClient = new AWS.DynamoDB.DocumentClient();
 
-/* app.get("/farmData", (req, res) => {
-  
-  // return res.send(Object.values(getFarmData()));
-}); */
-
 app.get("/farmData", async (req, res) => {
   return res.send(await getFarmData());
 });
 
 async function getFarmData() {
   var params = {
-    TableName: "farmData1",
+    TableName: "Nooras_farm",
   };
 
   const data = await docClient.scan(params, function (err, data) {
@@ -40,7 +35,6 @@ async function getFarmData() {
     }
   }).promise();
   try {
-    console.log(await Promise.resolve(data));
     console.log("Success");
     return await Promise.resolve(data);
   } catch (err) {
