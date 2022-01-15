@@ -1,6 +1,14 @@
 import "./App.css";
 import React from "react";
 import logo from "./logo.svg";
+import Table from "@mui/material/Table";
+import TableBody from "@mui/material/TableBody";
+import TableCell from "@mui/material/TableCell";
+import TableContainer from "@mui/material/TableContainer";
+import TableHead from "@mui/material/TableHead";
+import TableRow from "@mui/material/TableRow";
+import Paper from "@mui/material/Paper";
+import { DataGrid } from "@mui/x-data-grid";
 
 class App extends React.Component {
   constructor(props) {
@@ -34,26 +42,51 @@ class App extends React.Component {
 
   displayTable(that) {
     return (
-    <table>
-      {that.state.farmDataList.map((entry) => (
-        <tr>
-          <td>{entry.location}</td>
-          <td>{entry.datetime}</td>
-          <td>{entry.sensorType}</td>
-          <td>{entry.value}</td>
-        </tr>
-      ))}
-      </table>)
+      <TableContainer component={Paper}>
+        <Table sx={{ minWidth: 650 }} aria-label="simple table">
+          <TableHead>
+            <TableRow>
+              <TableCell align="left">Farm name</TableCell>
+              <TableCell align="right">Date</TableCell>
+              <TableCell align="right">Metric type</TableCell>
+              <TableCell align="right">Metric value</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {that.state.farmDataList.map((entry) => (
+              <TableRow
+                key={entry.id}
+                sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
+              >
+                <TableCell align="left">{entry.location}</TableCell>
+                <TableCell align="right">{entry.datetime}</TableCell>
+                <TableCell align="right">{entry.sensorType}</TableCell>
+                <TableCell align="right">{entry.value}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    );
   }
 
   render() {
     return (
       <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-
-          {this.state.farmDataList != null ? this.displayTable(this): (<p>Loading</p>)}
-        </header>
+        <header className="App-header"></header>
+        {this.state.farmDataList != null ? (
+          this.displayTable(this)
+        ) : (
+          <p>Loading</p>
+        )}
+        <div style={{ height: 400, width: "100%" }}>
+          <DataGrid
+            rows={rows}
+            columns={columns}
+            pageSize={5}
+            rowsPerPageOptions={[10]}
+          />
+        </div>
       </div>
     );
   }
