@@ -20,18 +20,30 @@ class App extends React.Component {
   }
 
   handleLoad() {
-
-    fetch('/farmData', {
-      method: 'GET'
-    },
-    ).then(response => {
+    fetch("/farmData", {
+      method: "GET",
+    }).then((response) => {
       if (response.ok) {
-        response.json().then(json => {
+        response.json().then((json) => {
           console.log(json.Items);
-          this.setState({farmDataList: JSON.stringify(json.Items)})
+          this.setState({ farmDataList: json.Items });
         });
       }
     });
+  }
+
+  displayTable(that) {
+    return (
+    <table>
+      {that.state.farmDataList.map((entry) => (
+        <tr>
+          <td>{entry.location}</td>
+          <td>{entry.datetime}</td>
+          <td>{entry.sensorType}</td>
+          <td>{entry.value}</td>
+        </tr>
+      ))}
+      </table>)
   }
 
   render() {
@@ -39,7 +51,8 @@ class App extends React.Component {
       <div className="App">
         <header className="App-header">
           <img src={logo} className="App-logo" alt="logo" />
-          <p>{!this.state.farmDataList ? "Loading..." : this.state.farmDataList}</p>
+
+          {this.state.farmDataList != null ? this.displayTable(this): (<p>Loading</p>)}
         </header>
       </div>
     );
