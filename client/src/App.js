@@ -7,8 +7,7 @@ class App extends React.Component {
     super(props);
     this.handleLoad = this.handleLoad.bind(this);
     this.state = {
-      data: null,
-      setData: null,
+      farmDataList: null,
     };
   }
 
@@ -21,20 +20,18 @@ class App extends React.Component {
   }
 
   handleLoad() {
-    try {
-      React.useEffect(() => {
-        fetch("/farmData")
-          .then((res) => res.json())
-          .then((json) => {
-            console.log(json)
-            this.setState({
-              items: json,
-            });
-          });
-      });
-    } catch (error) {
-      console.error("Could not load farm data");
-    }
+
+    fetch('/farmData', {
+      method: 'GET'
+    },
+    ).then(response => {
+      if (response.ok) {
+        response.json().then(json => {
+          console.log(json.Items);
+          this.setState({farmDataList: JSON.stringify(json.Items)})
+        });
+      }
+    });
   }
 
   render() {
@@ -42,7 +39,7 @@ class App extends React.Component {
       <div className="App">
         <header className="App-header">
           <img src={logo} className="App-logo" alt="logo" />
-          <p>{!this.state.data ? "Loading..." : this.state.data}</p>
+          <p>{!this.state.farmDataList ? "Loading..." : this.state.farmDataList}</p>
         </header>
       </div>
     );
