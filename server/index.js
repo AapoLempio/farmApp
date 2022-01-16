@@ -17,23 +17,37 @@ AWS.config.update({
 
 const docClient = new AWS.DynamoDB.DocumentClient();
 
-app.get("/farmData", async (req, res) => {
-  return res.send(await getFarmData());
+app.get("/noorasFarmData", async (req, res) => {
+  return res.send((await getFarmData("Nooras_farm")).Items);
 });
 
-async function getFarmData() {
+app.get("/ossiFarmData", async (req, res) => {
+  return res.send((await getFarmData("ossi_farm")).Items);
+});
+
+app.get("/partialFarmData", async (req, res) => {
+  return res.send((await getFarmData("PartialTech")).Items);
+});
+
+app.get("/frimanFarmData", async (req, res) => {
+  return res.send((await getFarmData("friman_metsola")).Items);
+});
+
+async function getFarmData(tableName) {
   var params = {
-    TableName: "Nooras_farm",
+    TableName: tableName,
   };
 
-  const data = await docClient.scan(params, function (err, data) {
-    if (err) {
-      console.error("Unable to find farm data", err);
-    } else {
-      console.log(`Found ${data.Count} entries`);
-      console.log(data.Items);
-    }
-  }).promise();
+  const data = await docClient
+    .scan(params, function (err, data) {
+      if (err) {
+        console.error("Unable to find farm data", err);
+      } else {
+        console.log(`Found ${data.Count} entries`);
+        console.log(data.Items);
+      }
+    })
+    .promise();
   try {
     console.log("Success");
     return await Promise.resolve(data);

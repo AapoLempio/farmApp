@@ -4,7 +4,9 @@ const fs = require("fs");
 
 const Papa = require("papaparse");
 
-var crypto = require("crypto");
+const crypto = require("crypto");
+
+const { format } = require("date-fns");
 
 AWS.config.update({
   region: "eu-west-1",
@@ -53,12 +55,8 @@ function createTable(tableName, filePath) {
 
   var params = {
     TableName: tableName,
-    KeySchema: [
-      { AttributeName: "id", KeyType: "HASH" }
-    ],
-    AttributeDefinitions: [
-      { AttributeName: "id", AttributeType: "N" }
-    ],
+    KeySchema: [{ AttributeName: "id", KeyType: "HASH" }],
+    AttributeDefinitions: [{ AttributeName: "id", AttributeType: "N" }],
     ProvisionedThroughput: {
       ReadCapacityUnits: 10,
       WriteCapacityUnits: 10,
@@ -72,46 +70,94 @@ function createTable(tableName, filePath) {
         JSON.stringify(err, null, 2)
       );
     } else {
-      console.log(
-        "Created table. Table description JSON:",
-        JSON.stringify(data, null, 2)
-      );
+      console.log(`Created ${tableName} table`);
     }
   });
 
-  console.log("Importing farm data into DynamoDB. Please wait.");
+  //Wait some time to finish creating table
 
-  const farmData = Papa.parse(fs.readFileSync(filePath, "utf8"), {
-    header: true,
-  });
+  setTimeout(() => {
+    console.log(
+      `Importing ${tableName} data into DynamoDB. This might take a couple of minutes. Please wait.`
+    );
 
-  farmData.data.forEach(function (datapoint) {
+    const farmData = Papa.parse(fs.readFileSync(filePath, "utf8"), {
+      header: true,
+    });
+    const dataItems = farmData.data
+      .map((datapoint) => (isValid(datapoint) ? datapoint : null))
+      .filter(Boolean);
+
+    const dataChunks = chunkArray(dataItems, 25);
+
+    dataChunks.forEach((dataChunk) => putItems(tableName, dataChunk));
+  }, 5000);
+}
+
+function putItems(tableName, datapoints) {
+  const items = [];
+  datapoints.forEach(function (datapoint) {
     const params = {
-      TableName: tableName,
-      Item: {
-        id: Number("0x" + String(crypto
-          .createHash("md5")
-          .update(String(datapoint.datetime + "_" + datapoint.sensorType))
-          .digest("hex"))),
-        location: datapoint.location,
-        datetime: datapoint.datetime,
-        sensorType: datapoint.sensorType,
-        value: datapoint.value,
+      PutRequest: {
+        Item: {
+          id: Number(
+            "0x" +
+              String(
+                crypto
+                  .createHash("md5")
+                  .update(
+                    String(datapoint.datetime + "_" + datapoint.sensorType)
+                  )
+                  .digest("hex")
+              )
+          ),
+          location: datapoint.location,
+          datetime: format(
+            new Date(Date.parse(datapoint.datetime)),
+            "yyyy/MM/dd kk:mm:ss"
+          ).toString(),
+          sensorType: datapoint.sensorType,
+          value: datapoint.value,
+        },
       },
     };
-
-    docClient.put(params, function (err, data) {
-      if (err) {
-        console.log(datapoint);
-        console.error(
-          "Unable to add datapoint",
-          datapoint,
-          ". Error JSON:",
-          JSON.stringify(err, null, 2)
-        );
-      } else {
-        console.log("PutItem succeeded:", datapoint);
-      }
-    });
+    items.push(params);
   });
+
+  var params = {
+    RequestItems: {},
+  };
+  params.RequestItems[tableName] = items;
+
+  docClient.batchWrite(params, function (err, data) {
+    if (err) {
+      console.error(
+        "Unable to add batch",
+        datapoints,
+        ". Error JSON:",
+        JSON.stringify(err, null, 2)
+      );
+    }
+  });
+}
+
+function chunkArray(array, chunk_size) {
+  var results = [];
+
+  while (array.length) {
+    results.push(array.splice(0, chunk_size));
+  }
+
+  return results;
+}
+
+function isValid(datapoint) {
+  const value = parseFloat(datapoint.value);
+  return datapoint.location != "" &&
+    Date.parse(datapoint.datetime) != NaN &&
+    ((datapoint.sensorType == "pH" && value >= 0 && value <= 14) ||
+      (datapoint.sensorType == "temperature" && value >= -50 && value <= 100) ||
+      (datapoint.sensorType == "rainFall" && value >= 0 && value <= 500))
+    ? true
+    : false;
 }
