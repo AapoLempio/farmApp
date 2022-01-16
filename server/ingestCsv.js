@@ -53,12 +53,8 @@ function createTable(tableName, filePath) {
 
   var params = {
     TableName: tableName,
-    KeySchema: [
-      { AttributeName: "id", KeyType: "HASH" }
-    ],
-    AttributeDefinitions: [
-      { AttributeName: "id", AttributeType: "N" }
-    ],
+    KeySchema: [{ AttributeName: "id", KeyType: "HASH" }],
+    AttributeDefinitions: [{ AttributeName: "id", AttributeType: "N" }],
     ProvisionedThroughput: {
       ReadCapacityUnits: 10,
       WriteCapacityUnits: 10,
@@ -81,37 +77,61 @@ function createTable(tableName, filePath) {
 
   console.log("Importing farm data into DynamoDB. Please wait.");
 
-  const farmData = Papa.parse(fs.readFileSync(filePath, "utf8"), {
-    header: true,
-  });
+  //Wait some time to finish creating tables
 
-  farmData.data.forEach(function (datapoint) {
-    const params = {
-      TableName: tableName,
-      Item: {
-        id: Number("0x" + String(crypto
-          .createHash("md5")
-          .update(String(datapoint.datetime + "_" + datapoint.sensorType))
-          .digest("hex"))),
-        location: datapoint.location,
-        datetime: datapoint.datetime,
-        sensorType: datapoint.sensorType,
-        value: datapoint.value,
-      },
-    };
-
-    docClient.put(params, function (err, data) {
-      if (err) {
-        console.log(datapoint);
-        console.error(
-          "Unable to add datapoint",
-          datapoint,
-          ". Error JSON:",
-          JSON.stringify(err, null, 2)
-        );
-      } else {
-        console.log("PutItem succeeded:", datapoint);
-      }
+  setTimeout(() => {
+    const farmData = Papa.parse(fs.readFileSync(filePath, "utf8"), {
+      header: true,
     });
+
+    farmData.data.forEach(function (datapoint) {
+      isValid(datapoint) && putItem(tableName, datapoint);
+    });
+  }, 5000);
+}
+
+function putItem(tableName, datapoint) {
+  const params = {
+    TableName: tableName,
+    Item: {
+      id: Number(
+        "0x" +
+          String(
+            crypto
+              .createHash("md5")
+              .update(String(datapoint.datetime + "_" + datapoint.sensorType))
+              .digest("hex")
+          )
+      ),
+      location: datapoint.location,
+      datetime: Date.parse(datapoint.datetime),
+      sensorType: datapoint.sensorType,
+      value: datapoint.value,
+    },
+  };
+
+  docClient.put(params, function (err, data) {
+    if (err) {
+      console.log(datapoint);
+      console.error(
+        "Unable to add datapoint",
+        datapoint,
+        ". Error JSON:",
+        JSON.stringify(err, null, 2)
+      );
+    } else {
+      console.log("PutItem succeeded:", datapoint);
+    }
   });
+}
+
+function isValid(datapoint) {
+  const value = parseFloat(datapoint.value);
+  return datapoint.location != "" &&
+    Date.parse(datapoint.datetime) != NaN &&
+    ((datapoint.sensorType == "pH" && value >= 0 && value <= 14) ||
+      (datapoint.sensorType == "temperature" && value >= -50 && value <= 100) ||
+      datapoint.sensorType == "rainFall" && value >= 0 && value <= 500)
+    ? true
+    : false;
 }
