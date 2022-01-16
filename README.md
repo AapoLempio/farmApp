@@ -40,6 +40,8 @@ If everything goes according to plan then the page should look like this:
 # Structure
 
 ## /server
+### deleteTables.js
+All the tables and their data can be deleted by running `node deleteTables.js` in powerShell in the server folder.
 
 ### ingestCsv.js
 To write the csv files' data to dynamodb, open powerShell on the server folder and run the `node ingestCsv.js` command. The `ingestCsv.js` script reads the csv files and batchWrites them in to the dynamoDb database.

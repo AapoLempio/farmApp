@@ -33,14 +33,14 @@ class App extends React.Component {
     window.removeEventListener("load", this.handleLoad);
   }
 
-  // Farm data for each farm is fetched as the page is loaded. 
+  // Farm data for each farm is fetched as the page is loaded.
   handleLoad() {
     fetch("/noorasFarmData", {
       method: "GET",
     }).then((response) => {
       if (response.ok) {
         response.json().then((json) => {
-          console.log(json);
+          //console.log(json);
           this.setState({ noorasFarmDataList: json });
         });
       }
@@ -50,7 +50,7 @@ class App extends React.Component {
     }).then((response) => {
       if (response.ok) {
         response.json().then((json) => {
-          console.log(json);
+          //console.log(json);
           this.setState({ ossiFarmDataList: json });
         });
       }
@@ -60,7 +60,7 @@ class App extends React.Component {
     }).then((response) => {
       if (response.ok) {
         response.json().then((json) => {
-          console.log(json);
+          //console.log(json);
           this.setState({ partialFarmDataList: json });
         });
       }
@@ -70,7 +70,7 @@ class App extends React.Component {
     }).then((response) => {
       if (response.ok) {
         response.json().then((json) => {
-          console.log(json);
+          //console.log(json);
           this.setState({ frimanFarmDataList: json });
         });
       }
@@ -81,8 +81,14 @@ class App extends React.Component {
   displayTable() {
     return (
       <div>
-        <div class="grid-container">
-          <div class="grid-child" style={{ height: 400, width: "100%" }}>
+        <p>
+          The tables can be filtered by clicking the three dots beside a column
+          name and giving it filtering parameters. The table can also be sorted
+          by that colums values through the aforementioned menu or by clicking
+          the sort arrow also beside the column's name.
+        </p>
+        <div className="grid-container">
+          <div className="grid-child" style={{ height: 400, width: "100%" }}>
             <DataGrid
               rows={this.state.noorasFarmDataList}
               columns={this.state.columns}
@@ -90,7 +96,7 @@ class App extends React.Component {
               rowsPerPageOptions={[20]}
             />
           </div>
-          <div class="grid-child" style={{ height: 400, width: "100%" }}>
+          <div className="grid-child" style={{ height: 400, width: "100%" }}>
             <DataGrid
               rows={this.state.ossiFarmDataList}
               columns={this.state.columns}
@@ -99,8 +105,8 @@ class App extends React.Component {
             />
           </div>
         </div>
-        <div class="grid-container">
-          <div class="grid-child" style={{ height: 400, width: "100%" }}>
+        <div className="grid-container">
+          <div className="grid-child" style={{ height: 400, width: "100%" }}>
             <DataGrid
               rows={this.state.partialFarmDataList}
               columns={this.state.columns}
@@ -108,7 +114,7 @@ class App extends React.Component {
               rowsPerPageOptions={[20]}
             />
           </div>
-          <div class="grid-child" style={{ height: 400, width: "100%" }}>
+          <div className="grid-child" style={{ height: 400, width: "100%" }}>
             <DataGrid
               rows={this.state.frimanFarmDataList}
               columns={this.state.columns}

@@ -53,6 +53,7 @@ const dir = "../farmData";
 function createTable(tableName, filePath) {
   console.log("Creating table: " + tableName);
 
+  // Every data item is given an id that will be generated 
   const params = {
     TableName: tableName,
     KeySchema: [{ AttributeName: "id", KeyType: "HASH" }],
@@ -74,32 +75,40 @@ function createTable(tableName, filePath) {
     }
   });
 
-  //Wait some time to finish creating table
-
+  // Wait some time to finish creating table
   setTimeout(() => {
     console.log(
       `Importing ${tableName} data into DynamoDB. This might take a couple of minutes. Please wait.`
     );
 
+    // Papa parses the csv data into json format
     const farmData = Papa.parse(fs.readFileSync(filePath, "utf8"), {
       header: true,
     });
+
+    // Validate the data
     const dataItems = farmData.data
       .map((datapoint) => (isValid(datapoint) ? datapoint : null))
       .filter(Boolean);
 
+    // Splice the array in to chunck of twentyfive. This is the max batch size.
     const dataChunks = chunkArray(dataItems, 25);
 
+    // Loop through chunks
     dataChunks.forEach((dataChunk) => putItems(tableName, dataChunk));
   }, 5000);
 }
 
 function putItems(tableName, datapoints) {
   const items = [];
+
+  // Format each datapoint in the chunk to the dynamodb putrequest format and 
+  // push it to an array
   datapoints.forEach(function (datapoint) {
     const params = {
       PutRequest: {
         Item: {
+          // ID is generated from the datetime and the sensortype
           id: Number(
             "0x" +
               String(
@@ -129,6 +138,7 @@ function putItems(tableName, datapoints) {
   };
   params.RequestItems[tableName] = items;
 
+  // Batch write the formatted chunk
   docClient.batchWrite(params, function (err, data) {
     if (err) {
       console.error(
@@ -141,6 +151,7 @@ function putItems(tableName, datapoints) {
   });
 }
 
+// Splices an array to chunks
 function chunkArray(array, chunk_size) {
   const results = [];
 
@@ -151,6 +162,7 @@ function chunkArray(array, chunk_size) {
   return results;
 }
 
+// Rules for farm data validation
 function isValid(datapoint) {
   const value = parseFloat(datapoint.value);
   return datapoint.location != "" &&

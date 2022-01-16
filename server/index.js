@@ -2,7 +2,7 @@ const cors = require("cors");
 const express = require("express");
 const path = require("path");
 const { get } = require("express/lib/request");
-var AWS = require("aws-sdk");
+const AWS = require("aws-sdk");
 
 const PORT = process.env.PORT || 3001;
 
@@ -17,6 +17,7 @@ AWS.config.update({
 
 const docClient = new AWS.DynamoDB.DocumentClient();
 
+//Endpoint to fetch data from frontend
 app.get("/noorasFarmData", async (req, res) => {
   return res.send((await getFarmData("Nooras_farm")).Items);
 });
@@ -34,10 +35,11 @@ app.get("/frimanFarmData", async (req, res) => {
 });
 
 async function getFarmData(tableName) {
-  var params = {
+  const params = {
     TableName: tableName,
   };
 
+  // Scan the database by table name
   const data = await docClient
     .scan(params, function (err, data) {
       if (err) {
@@ -48,6 +50,8 @@ async function getFarmData(tableName) {
       }
     })
     .promise();
+
+  // If scan was successful, return the data to the endpoint
   try {
     console.log("Success");
     return await Promise.resolve(data);
