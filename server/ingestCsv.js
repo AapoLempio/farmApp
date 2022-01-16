@@ -53,7 +53,7 @@ const dir = "../farmData";
 function createTable(tableName, filePath) {
   console.log("Creating table: " + tableName);
 
-  var params = {
+  const params = {
     TableName: tableName,
     KeySchema: [{ AttributeName: "id", KeyType: "HASH" }],
     AttributeDefinitions: [{ AttributeName: "id", AttributeType: "N" }],
@@ -124,7 +124,7 @@ function putItems(tableName, datapoints) {
     items.push(params);
   });
 
-  var params = {
+  const params = {
     RequestItems: {},
   };
   params.RequestItems[tableName] = items;
@@ -142,7 +142,7 @@ function putItems(tableName, datapoints) {
 }
 
 function chunkArray(array, chunk_size) {
-  var results = [];
+  const results = [];
 
   while (array.length) {
     results.push(array.splice(0, chunk_size));
