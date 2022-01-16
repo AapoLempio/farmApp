@@ -33,6 +33,7 @@ class App extends React.Component {
     window.removeEventListener("load", this.handleLoad);
   }
 
+  // Farm data for each farm is fetched as the page is loaded. 
   handleLoad() {
     fetch("/noorasFarmData", {
       method: "GET",
@@ -76,6 +77,7 @@ class App extends React.Component {
     });
   }
 
+  //The data on the page is dispalyed in a grid container
   displayTable() {
     return (
       <div>

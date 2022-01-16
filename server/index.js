@@ -44,7 +44,7 @@ async function getFarmData(tableName) {
         console.error("Unable to find farm data", err);
       } else {
         console.log(`Found ${data.Count} entries`);
-        console.log(data.Items);
+        //console.log(data.Items);
       }
     })
     .promise();
