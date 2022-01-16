@@ -17,7 +17,7 @@ AWS.config.update({
 
 const docClient = new AWS.DynamoDB.DocumentClient();
 
-//Endpoint to fetch data from frontend
+//Endpoints to fetch data from frontend
 app.get("/noorasFarmData", async (req, res) => {
   return res.send((await getFarmData("Nooras_farm")).Items);
 });

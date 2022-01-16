@@ -84,8 +84,8 @@ class App extends React.Component {
         <p>
           The tables can be filtered by clicking the three dots beside a column
           name and giving it filtering parameters. The table can also be sorted
-          by that colums values through the aforementioned menu or by clicking
-          the sort arrow also beside the column's name.
+          by that column's values through the afore mentioned menu or by clicking
+          the sort arrow, also beside the column's name.
         </p>
         <div className="grid-container">
           <div className="grid-child" style={{ height: 400, width: "100%" }}>

@@ -1,12 +1,9 @@
 const AWS = require("aws-sdk");
-
 const fs = require("fs");
-
 const Papa = require("papaparse");
-
 const crypto = require("crypto");
-
 const { format } = require("date-fns");
+const path = require("path");
 
 AWS.config.update({
   region: "eu-west-1",
@@ -16,8 +13,6 @@ AWS.config.update({
 const dynamodb = new AWS.DynamoDB();
 
 const docClient = new AWS.DynamoDB.DocumentClient();
-
-const path = require("path");
 
 const dir = "../farmData";
 
@@ -53,7 +48,7 @@ const dir = "../farmData";
 function createTable(tableName, filePath) {
   console.log("Creating table: " + tableName);
 
-  // Every data item is given an id that will be generated 
+  // Every data item is given an id that will be generated
   const params = {
     TableName: tableName,
     KeySchema: [{ AttributeName: "id", KeyType: "HASH" }],
@@ -102,7 +97,7 @@ function createTable(tableName, filePath) {
 function putItems(tableName, datapoints) {
   const items = [];
 
-  // Format each datapoint in the chunk to the dynamodb putrequest format and 
+  // Format each datapoint in the chunk to the dynamodb putrequest format and
   // push it to an array
   datapoints.forEach(function (datapoint) {
     const params = {

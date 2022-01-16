@@ -25,7 +25,7 @@ const dir = "../farmData";
 
       // Stat the file to see if we have a file or dir
       const stat = await fs.promises.stat(fullPath);
-      
+
       // If is file then we try to delete a table by that files name
       if (stat.isFile()) {
         console.log("'%s' is a file.", fullPath);
